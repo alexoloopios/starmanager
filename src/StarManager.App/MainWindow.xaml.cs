@@ -703,6 +703,18 @@ public partial class MainWindow : Window
             SetThemeBrush("AppBadgeStoppedBackgroundBrush", Color.FromRgb(43, 50, 64));
             SetThemeBrush("AppBadgeStoppedForegroundBrush", Color.FromRgb(213, 217, 225));
             SetThemeBrush("AppBadgeStoppedBorderBrush", Color.FromRgb(139, 150, 170));
+
+            SetThemeBrush(SystemColors.WindowBrushKey, Color.FromRgb(30, 35, 43));
+            SetThemeBrush(SystemColors.WindowTextBrushKey, Color.FromRgb(243, 244, 246));
+            SetThemeBrush(SystemColors.ControlBrushKey, Color.FromRgb(37, 43, 53));
+            SetThemeBrush(SystemColors.ControlTextBrushKey, Color.FromRgb(243, 244, 246));
+            SetThemeBrush(SystemColors.GrayTextBrushKey, Color.FromRgb(164, 176, 194));
+            SetThemeBrush(SystemColors.HighlightBrushKey, Color.FromRgb(51, 90, 148));
+            SetThemeBrush(SystemColors.HighlightTextBrushKey, Color.FromRgb(243, 244, 246));
+            SetThemeBrush(SystemColors.InactiveSelectionHighlightBrushKey, Color.FromRgb(45, 53, 66));
+            SetThemeBrush(SystemColors.InactiveSelectionHighlightTextBrushKey, Color.FromRgb(243, 244, 246));
+            SetThemeBrush(SystemColors.MenuBrushKey, Color.FromRgb(37, 43, 53));
+            SetThemeBrush(SystemColors.MenuTextBrushKey, Color.FromRgb(243, 244, 246));
             return;
         }
 
@@ -727,9 +739,26 @@ public partial class MainWindow : Window
         SetThemeBrush("AppBadgeStoppedBackgroundBrush", Color.FromRgb(241, 243, 246));
         SetThemeBrush("AppBadgeStoppedForegroundBrush", Color.FromRgb(55, 65, 81));
         SetThemeBrush("AppBadgeStoppedBorderBrush", Color.FromRgb(156, 163, 175));
+
+        SetThemeBrush(SystemColors.WindowBrushKey, Color.FromRgb(255, 255, 255));
+        SetThemeBrush(SystemColors.WindowTextBrushKey, Color.FromRgb(17, 24, 39));
+        SetThemeBrush(SystemColors.ControlBrushKey, Color.FromRgb(255, 255, 255));
+        SetThemeBrush(SystemColors.ControlTextBrushKey, Color.FromRgb(17, 24, 39));
+        SetThemeBrush(SystemColors.GrayTextBrushKey, Color.FromRgb(99, 107, 120));
+        SetThemeBrush(SystemColors.HighlightBrushKey, Color.FromRgb(220, 235, 255));
+        SetThemeBrush(SystemColors.HighlightTextBrushKey, Color.FromRgb(17, 24, 39));
+        SetThemeBrush(SystemColors.InactiveSelectionHighlightBrushKey, Color.FromRgb(238, 242, 247));
+        SetThemeBrush(SystemColors.InactiveSelectionHighlightTextBrushKey, Color.FromRgb(17, 24, 39));
+        SetThemeBrush(SystemColors.MenuBrushKey, Color.FromRgb(255, 255, 255));
+        SetThemeBrush(SystemColors.MenuTextBrushKey, Color.FromRgb(17, 24, 39));
     }
 
     private static void SetThemeBrush(string key, Color color)
+    {
+        Application.Current.Resources[key] = new SolidColorBrush(color);
+    }
+
+    private static void SetThemeBrush(object key, Color color)
     {
         Application.Current.Resources[key] = new SolidColorBrush(color);
     }
