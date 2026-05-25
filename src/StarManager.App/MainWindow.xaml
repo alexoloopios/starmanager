@@ -17,6 +17,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -97,7 +98,38 @@
             </ComboBox>
         </StackPanel>
 
-        <TabControl x:Name="MainSectionsTabControl" Grid.Row="2" Grid.ColumnSpan="2" TabIndex="4">
+        <Border x:Name="ScanProgressBorder"
+                Grid.Row="2"
+                Grid.ColumnSpan="2"
+                Margin="0,0,0,10"
+                Padding="12,10"
+                Background="{DynamicResource AppSurfaceBrush}"
+                BorderBrush="{DynamicResource AppBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="6"
+                Visibility="Collapsed">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock x:Name="ScanProgressTextBlock"
+                           Grid.Row="0"
+                           Margin="0,0,0,8"
+                           FontWeight="SemiBold"
+                           Text="Scanning STAR setup..." />
+
+                <ProgressBar x:Name="ScanProgressBar"
+                             Grid.Row="1"
+                             Height="18"
+                             Minimum="0"
+                             Maximum="100"
+                             Value="0" />
+            </Grid>
+        </Border>
+
+        <TabControl x:Name="MainSectionsTabControl" Grid.Row="3" Grid.ColumnSpan="2" TabIndex="4">
             <TabItem x:Name="ProvidersTabItem" Header="Providers">
                 <Grid Margin="10">
                     <Grid.RowDefinitions>
@@ -389,13 +421,13 @@
         </TabControl>
 
         <TextBlock x:Name="StatusTextBlock"
-                   Grid.Row="3"
+                   Grid.Row="4"
                    Grid.ColumnSpan="2"
                    Margin="0,10,0,0"
                    FontWeight="SemiBold"
                    Text="Select your STAR folder and click Scan." />
 
-        <Expander Grid.Row="4"
+        <Expander Grid.Row="5"
                   Grid.ColumnSpan="2"
                   Margin="0,10,0,0"
                   Header="Activity log"

@@ -39,6 +39,8 @@ public partial class MainWindow : Window
     private bool _isLoadingProviderIniContent;
     private bool _hasUnsavedProviderIniChanges;
     private bool _isRestoringProviderSelection;
+    private bool _isScanning;
+    private int _scanProgressGeneration;
 
     private const int MaxRecentStarPaths = 10;
     private const int MaxActivityLogLines = 300;
@@ -108,6 +110,11 @@ public partial class MainWindow : Window
 
     private void BrowseButton_OnClick(object sender, RoutedEventArgs e)
     {
+        if (_isScanning)
+        {
+            return;
+        }
+
         var dialog = new Microsoft.Win32.OpenFolderDialog
         {
             Title = "Select your STAR root folder",
@@ -125,22 +132,36 @@ public partial class MainWindow : Window
         LogStatus("STAR folder selected. Click Scan to detect components.");
     }
 
-    private void ScanButton_OnClick(object sender, RoutedEventArgs e)
+    private async void ScanButton_OnClick(object sender, RoutedEventArgs e)
     {
-        ScanSelectedStarRoot();
+        await ScanSelectedStarRootAsync();
     }
 
-    private void ScanSelectedStarRoot()
+    private async Task ScanSelectedStarRootAsync()
     {
+        if (_isScanning)
+        {
+            return;
+        }
+
         if (string.IsNullOrWhiteSpace(_selectedStarRoot))
         {
             LogStatus("Select a STAR folder first.");
             return;
         }
 
+        var currentScanGeneration = ++_scanProgressGeneration;
+        _isScanning = true;
+        SetScanningUiState(isScanning: true);
+        ShowScanProgress(10, "Scanning STAR setup...");
+
         try
         {
-            _scanResult = _discoveryService.Scan(_selectedStarRoot);
+            var scanRoot = _selectedStarRoot;
+            var scanResult = await Task.Run(() => _discoveryService.Scan(scanRoot));
+            _scanResult = scanResult;
+
+            ShowScanProgress(55, "Applying scan results...");
             Providers.Clear();
 
             foreach (var provider in _scanResult.Providers)
@@ -150,11 +171,14 @@ public partial class MainWindow : Window
                 Providers.Add(provider);
             }
 
+            ShowScanProgress(80, "Refreshing provider list...");
             ProvidersView.Refresh();
             ScanDiagnosticsTextBox.Text = string.Join(Environment.NewLine, _scanResult.Diagnostics);
 
             ProvidersDataGrid.SelectedIndex = Providers.Count > 0 ? 0 : -1;
             UpdateSelectedProviderState();
+
+            ShowScanProgress(100, "Scan complete.");
 
             LogStatus(
                 $"Scan complete: {_scanResult.Providers.Count} provider(s) found. " +
@@ -164,8 +188,15 @@ public partial class MainWindow : Window
         }
         catch (Exception ex)
         {
+            ShowScanProgress(100, "Scan failed.");
             ScanDiagnosticsTextBox.Text = ex.ToString();
             LogStatus($"Scan failed: {ex.Message}", isError: true);
+        }
+        finally
+        {
+            _isScanning = false;
+            SetScanningUiState(isScanning: false);
+            _ = HideScanProgressAfterDelayAsync(currentScanGeneration);
         }
     }
 
@@ -583,6 +614,11 @@ public partial class MainWindow : Window
             return;
         }
 
+        if (_isScanning)
+        {
+            return;
+        }
+
         if (RecentStarPathsComboBox.SelectedItem is not string selectedPath)
         {
             return;
@@ -836,7 +872,7 @@ public partial class MainWindow : Window
             }
 
             LogStatus("Loaded last STAR folder from settings. Running initial scan.");
-            ScanSelectedStarRoot();
+            _ = Dispatcher.BeginInvoke(async () => await ScanSelectedStarRootAsync(), DispatcherPriority.Background);
         }
 
         var themeName = string.IsNullOrWhiteSpace(_settings.ThemeName) ? "System" : _settings.ThemeName;
@@ -1019,6 +1055,34 @@ public partial class MainWindow : Window
 
         TrimActivityLogToLimit();
         ActivityLogTextBox.ScrollToEnd();
+    }
+
+    private void SetScanningUiState(bool isScanning)
+    {
+        BrowseButton.IsEnabled = !isScanning;
+        ScanButton.IsEnabled = !isScanning;
+        RecentStarPathsComboBox.IsEnabled = !isScanning;
+    }
+
+    private void ShowScanProgress(double value, string message)
+    {
+        ScanProgressBorder.Visibility = Visibility.Visible;
+        ScanProgressBar.Value = value;
+        ScanProgressTextBlock.Text = $"{message} {value:0}%";
+    }
+
+    private async Task HideScanProgressAfterDelayAsync(int scanGeneration)
+    {
+        await Task.Delay(TimeSpan.FromSeconds(3));
+
+        if (scanGeneration != _scanProgressGeneration || _isScanning)
+        {
+            return;
+        }
+
+        ScanProgressBorder.Visibility = Visibility.Collapsed;
+        ScanProgressBar.Value = 0;
+        ScanProgressTextBlock.Text = "Scanning STAR setup...";
     }
 
     private void TrimActivityLogToLimit()
