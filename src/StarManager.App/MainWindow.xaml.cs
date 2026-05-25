@@ -108,7 +108,7 @@ public partial class MainWindow : Window
         }
     }
 
-    private void BrowseButton_OnClick(object sender, RoutedEventArgs e)
+    private async void BrowseButton_OnClick(object sender, RoutedEventArgs e)
     {
         if (_isScanning)
         {
@@ -129,7 +129,8 @@ public partial class MainWindow : Window
         _selectedStarRoot = dialog.FolderName;
         StarPathTextBox.Text = _selectedStarRoot;
         AddRecentStarPath(_selectedStarRoot);
-        LogStatus("STAR folder selected. Click Scan to detect components.");
+        LogStatus("STAR folder selected. Running initial scan.");
+        await ScanSelectedStarRootAsync();
     }
 
     private async void ScanButton_OnClick(object sender, RoutedEventArgs e)
@@ -607,7 +608,7 @@ public partial class MainWindow : Window
         _ = ProviderSearchTextBox.Focus();
     }
 
-    private void RecentStarPathsComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    private async void RecentStarPathsComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (_isUpdatingRecentStarPathSelection)
         {
@@ -633,7 +634,8 @@ public partial class MainWindow : Window
         _selectedStarRoot = selectedPath;
         StarPathTextBox.Text = selectedPath;
         AddRecentStarPath(selectedPath);
-        LogStatus("Recent STAR setup selected. Click Scan to refresh components.");
+        LogStatus("Recent STAR setup selected. Running initial scan.");
+        await ScanSelectedStarRootAsync();
     }
 
     private bool ProviderMatchesSearchQuery(object item)
